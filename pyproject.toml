@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "pybraendstofpriser"
+version = "0.0.1"
+description = "Library for fetching/scraping Danish fuel prices"
+authors = ["Malene Trab <malene@trab.dk>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.32.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
