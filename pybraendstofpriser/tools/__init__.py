@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 import logging
-import requests
+import aiohttp
 from bs4 import BeautifulSoup as BS
 
 _LOGGER = logging.getLogger(__name__)
@@ -10,12 +10,13 @@ _LOGGER = logging.getLogger(__name__)
 
 @staticmethod
 async def get_website(url: str, timeout: int = 10):
-    """Fetch content from a website."""
+    """Fetch content from a website asynchronously."""
     try:
-        response = requests.get(url, timeout=timeout)
-        response.raise_for_status()
-        return response
-    except requests.RequestException as e:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, timeout=timeout) as response:
+                response.raise_for_status()
+                return await response.text()
+    except aiohttp.ClientError as e:
         _LOGGER.error("Error fetching %s: %s", url, e)
         return None
 
@@ -23,9 +24,7 @@ async def get_website(url: str, timeout: int = 10):
 @staticmethod
 def get_html_soup(r, parser="html.parser"):
     """Parse HTML content using BeautifulSoup."""
-    if r.text:
-        return BS(r.text, parser)
-    return None
+    return BS(r, parser)
 
 
 @staticmethod

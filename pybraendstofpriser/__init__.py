@@ -46,15 +46,6 @@ class Braendstofpriser:
                 ns = f".companies.{company.replace('.py', '')}"
                 mod = await self._load_module(ns)
 
-                # company_list_obj = Company(
-                #     module=mod,
-                #     namespace=ns,
-                #     products=mod.PRODUCTS,
-                #     name=mod.COMPANY_NAME,
-                # )
-
-                # self.companies.append(company_list_obj)
-
                 self.companies.update(
                     {
                         mod.COMPANY_NAME: {
