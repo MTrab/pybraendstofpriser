@@ -6,7 +6,8 @@ This is a PyPI module for fetching/scraping fuel prices from Danish suppliers, p
 
 ### These companies are currently available:
 
-*   [OK](https://www.ok.dk)
+*   [Go'On](https://goon.nu)
 *   [OIL! tank & go](https://www.oil-tankstationer.dk)
-*   [Shell](https://shellservice.dk)
+*   [OK](https://www.ok.dk)
 *   [Q8](https://www.q8.dk)
+*   [Shell](https://shellservice.dk)
