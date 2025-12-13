@@ -23,18 +23,14 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class FuelCompany:
-    """OK fuel company class."""
-
-    def __init__(self):
-        """Initialize the OKCompany class."""
-        pass
+    """Fuel company class."""
 
     async def fetch_price(self, product: str) -> float | None:
-        """Fetch fuel prices from OK."""
+        """Fetch fuel prices."""
         return await self._parser(product)
 
     async def list_products(self) -> list[str]:
-        """List available fuel products from OK."""
+        """List available fuel products."""
         retlist = []
         for _, productDict in PRODUCTS.items():
             retlist.append(productDict["name"])
