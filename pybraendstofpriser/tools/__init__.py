@@ -2,26 +2,20 @@
 
 from __future__ import annotations
 import logging
-import ssl
 import aiohttp
 from bs4 import BeautifulSoup as BS
 
 _LOGGER = logging.getLogger(__name__)
 
-# Create the SSL context globally to reuse it
-SSL_CONTEXT = ssl.create_default_context()
-SSL_CONTEXT.minimum_version = ssl.TLSVersion.TLSv1_3
-SSL_CONTEXT.maximum_version = ssl.TLSVersion.TLSv1_3
-
 
 @staticmethod
 async def get_website(
-    url: str, timeout: int = 10, headers: dict | None = None, as_json: bool = False
+    url: str, timeout: int = 10, headers: dict | None = None, as_json: bool = False, ssl_context=None
 ):
     """Fetch content from a website asynchronously."""
     try:
         async with aiohttp.ClientSession(headers=headers) as session:
-            async with session.get(url, timeout=timeout, ssl=SSL_CONTEXT) as response:
+            async with session.get(url, timeout=timeout, ssl=ssl_context) as response:
                 response.raise_for_status()
                 return await response.text() if not as_json else await response.json()
     except aiohttp.ClientError as e:

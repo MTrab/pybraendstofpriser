@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import logging
+import ssl
 
 from ..exceptions import ErrorFetchingProduct
 from ..const import DIESEL, OCTANE_100, OCTANE_95, DIESEL_PLUS
@@ -19,6 +20,11 @@ PRODUCTS = {
 COMPANY_NAME = "Shell"
 
 _LOGGER = logging.getLogger(__name__)
+
+# Create the SSL context globally to reuse it
+SSL_CONTEXT = ssl.create_default_context()
+SSL_CONTEXT.minimum_version = ssl.TLSVersion.TLSv1_3
+SSL_CONTEXT.maximum_version = ssl.TLSVersion.TLSv1_3
 
 
 class FuelCompany:
@@ -38,7 +44,9 @@ class FuelCompany:
     async def _parser(self, product) -> float | None:
         """Parse the fetched data."""
         headers = {"User-Agent": "pybraendstofpriser"}
-        r = await get_website(baseurl, timeout=5, as_json=True, headers=headers)
+        r = await get_website(
+            baseurl, timeout=5, as_json=True, headers=headers, ssl_context=SSL_CONTEXT
+        )
         prod_data = r["results"]["products"]
 
         for item in prod_data:
