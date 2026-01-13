@@ -2,28 +2,26 @@
 
 from __future__ import annotations
 import logging
-import re
-import subprocess
 
-from ..exceptions import ErrorFetchingProduct
-from ..const import DIESEL, DOWNLOAD_PATH, OCTANE_92, OCTANE_95
+from ..exceptions import ProductNotFoundError, StationNotFoundError
+from ..const import DIESEL, OCTANE_92, OCTANE_95
 from ..tools import (
     clean_value,
-    download_file,
+    clean_product_name,
     get_html_soup,
     get_website,
 )
 
 host = "https://goon.nu"
-baseurl = f"{host}/wp-content/themes/goon/build/images"
+baseurl = f"{host}"
 
 PRODUCTS = {
-    OCTANE_92: {"name": "Blyfri 92", "ocr_crop": ["58", "176", "134", "46"]},
-    OCTANE_95: {"name": "Blyfri 95", "ocr_crop": ["58", "232", "134", "46"]},
-    DIESEL: {"name": "Diesel", "ocr_crop": ["58", "289", "134", "46"]},
+    OCTANE_92: {"name": "Blyfri 92"},
+    OCTANE_95: {"name": "Blyfri 95"},
+    DIESEL: {"name": "Diesel"},
 }
 
-COMPANY_NAME = "Go'On"
+COMPANY_NAME = "Go’on"
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,45 +29,76 @@ _LOGGER = logging.getLogger(__name__)
 class FuelCompany:
     """Fuel company class."""
 
-    async def fetch_price(self, product: str) -> float | None:
+    def __init__(self) -> None:
+        """Initialize the FuelCompany class."""
+        self.__stations: list[dict] = []
+        self.station: str | None = None
+
+    async def fetch_price(self, product: str) -> float:
         """Fetch fuel prices."""
-        return await self._parser(product)
+        for s in self.__stations:
+            if s["name"] == self.station:
+                if s["prices"].get(product) is None:
+                    raise ProductNotFoundError(
+                        f"Product '{PRODUCTS[product]['name']}' not found at station '{self.station}'"
+                    )
+                return s["prices"].get(product)
+
+        raise ProductNotFoundError(
+            f"Product '{PRODUCTS[product]['name']}' not found at station '{self.station}'"
+        )
 
     async def list_products(self) -> list[str]:
         """List available fuel products."""
-        retlist = []
-        for _, productDict in PRODUCTS.items():
-            retlist.append(productDict["name"])
-        return retlist
+        if not self.__stations:
+            await self._load_stations()
 
-    async def _parser(self, product) -> float | None:
-        """Parse the fetched data."""
+        for s in self.__stations:
+            if s["name"] == self.station:
+                retlist = []
+                for product, price in s["prices"].items():
+                    if price is not None:
+                        retlist.append(PRODUCTS[product]["name"])
+                return retlist
+
+        raise StationNotFoundError(
+            f"Station '{self.station}' not found. Cannot list products."
+        )
+
+    async def list_stations(self) -> list[dict]:
+        """List available fuel stations."""
+        if not self.__stations:
+            await self._load_stations()
+        return self.__stations
+
+    async def _load_stations(self) -> None:
+        """Load fuel stations."""
         r = await get_website(baseurl, timeout=5)
         html = get_html_soup(r)
-        file = [
-            host + node.get("href")
-            for node in html.find_all(
-                "a", {"href": re.compile(r"[\w]{5,}[\d]{10,}.png")}
-            )
-        ][0]
+        station_set = html.find_all("div", {"class": "table-scroll-wrapper"})
+        stations = station_set[0].find_all("tr")
 
-        await download_file(file, "goon.png", DOWNLOAD_PATH)
-
-        ocr_cmd = (
-            ["ssocr"]
-            + ["-d5"]
-            + ["-t20"]
-            + ["make_mono", "invert", "-D"]
-            + ["crop"]
-            + PRODUCTS[product]["ocr_crop"]
-            + [DOWNLOAD_PATH + "goon.png"]
-        )
-        # Perform OCR on the cropped image
-        with subprocess.Popen(
-            ocr_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        ) as ocr:
-            out = ocr.communicate()
-            if out[0] != b"":
-                return clean_value(out[0].strip().decode("utf-8"))
-
-        # raise ErrorFetchingProduct(f"Product '{PRODUCTS[product]['name']}' not found")
+        for row in stations:
+            cells = row.find_all("td")
+            if cells:
+                name_address = [
+                    get_html_soup(_).text.strip() for _ in str(cells[0]).split("<br/>")
+                ]
+                station_name = clean_product_name(name_address[0])
+                station_address = (
+                    clean_product_name(name_address[1]) if len(name_address) > 1 else ""
+                )
+                fuel_92_price = clean_value(cells[1].text)
+                fuel_95_price = clean_value(cells[2].text)
+                diesel_price = clean_value(cells[3].text)
+                self.__stations.append(
+                    {
+                        "name": station_name,
+                        "address": station_address,
+                        "prices": {
+                            OCTANE_92: fuel_92_price,
+                            OCTANE_95: fuel_95_price,
+                            DIESEL: diesel_price,
+                        },
+                    }
+                )
