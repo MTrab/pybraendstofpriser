@@ -1,5 +1,9 @@
 """OK fetcher for pybraendstofpriser."""
 
+#
+# New site https://www.ok.dk/privat/paa-tanken/find-tank/gettankstationer
+#
+
 from __future__ import annotations
 import logging
 
