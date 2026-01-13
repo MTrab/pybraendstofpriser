@@ -51,7 +51,6 @@ def clean_value(value) -> float | None:
     try:
         return float(value)
     except ValueError:
-        _LOGGER.error("Error converting value to float: %s", value)
         return None
 
 
