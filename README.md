@@ -4,6 +4,8 @@
 
 This is a PyPI module for fetching/scraping fuel prices from Danish suppliers, primarily developed for use with [Home Assistant](https://home-assistant.io), but I try to keep it as widely usable as possible.
 
+REQUIRES [SSOCR](https://www.unix-ag.uni-kl.de/~auerswal/ssocr/) installed
+
 ### These companies are currently available:
 
 *   [Go'On](https://goon.nu)

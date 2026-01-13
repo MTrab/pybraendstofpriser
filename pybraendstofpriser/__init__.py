@@ -24,6 +24,8 @@ class Braendstofpriser:
         """Initialize the Braendstofpriser class."""
         # self.companies = []
         self.companies = {}
+        self.company = None
+
         _LOGGER.debug("Braendstofpriser initialized")
 
     async def list_companies(self):
@@ -57,12 +59,43 @@ class Braendstofpriser:
 
         return self.companies
 
-    async def get_price(self, company: str, product: str):
-        """Get fuel price for a specific company and product."""
-        _LOGGER.debug("Getting price for %s - %s", company, product)
+    async def set_company(self, company: str):
+        """Set the fuel company."""
+        _LOGGER.debug("Setting company to %s", company)
         c = await self._load_module(self.companies[company]["namespace"])
-        co = c.FuelCompany()
-        return await co.fetch_price(product)
+        self.company = c.FuelCompany()
+
+    def set_station(self, station: str):
+        """Set the fuel station for the current company."""
+        if self.company is None:
+            raise ValueError("Company not set. Please set a company first.")
+
+        _LOGGER.debug("Setting station to %s", station)
+        self.company.station = station
+
+    async def get_price(self, product: str):
+        """Get fuel price for a specific company and product."""
+        if self.company is None:
+            raise ValueError("Company not set. Please set a company first.")
+
+        _LOGGER.debug("Getting price for %s", product)
+        return await self.company.fetch_price(product)
+
+    async def list_stations(self, company: str):
+        """List fuel stations for a specific company."""
+        if self.company is None:
+            raise ValueError("Company not set. Please set a company first.")
+
+        _LOGGER.debug("Listing stations for %s", company)
+        return await self.company.list_stations()
+
+    async def list_products(self):
+        """List fuel products for a specific company and station."""
+        if self.company.station is None:
+            raise ValueError("Station not set. Please set a station first.")
+
+        _LOGGER.debug("Listing products for %s", self.company.station)
+        return await self.company.list_products()
 
     @staticmethod
     async def _load_module(namespace: str):
