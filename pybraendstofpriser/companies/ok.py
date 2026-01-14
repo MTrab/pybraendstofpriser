@@ -1,13 +1,9 @@
 """OK fetcher for pybraendstofpriser."""
 
-#
-# New site https://www.ok.dk/privat/paa-tanken/find-tank/gettankstationer
-#
-
 from __future__ import annotations
 import logging
 
-from . import FuelCompanyBase
+from . import FuelCompanyBase, FuelStation
 
 from ..exceptions import ProductNotFoundError
 from ..const import DIESEL, OCTANE_100, OCTANE_95
@@ -72,6 +68,7 @@ class FuelCompany(FuelCompanyBase):
                 # No products at this station
                 continue
 
+            station_id = station["id"] if isinstance(station["id"], int) else None
             station_name = clean_product_name(station["navn"])
             station_address = clean_product_name(station["adresse"])
 
@@ -86,14 +83,16 @@ class FuelCompany(FuelCompanyBase):
                     fuel_100_price = clean_value(product["pris"])
                 elif product["navn"] == PRODUCTS[DIESEL]["name"]:
                     diesel_price = clean_value(product["pris"])
+
             self._stations.append(
-                {
-                    "name": station_name,
-                    "address": station_address,
-                    "prices": {
+                FuelStation(
+                    id=station_id,  # type: ignore
+                    name=station_name,
+                    address=station_address,
+                    prices={
                         OCTANE_95: fuel_95_price,
                         OCTANE_100: fuel_100_price,
                         DIESEL: diesel_price,
                     },
-                }
+                )
             )
