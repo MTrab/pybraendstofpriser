@@ -3,7 +3,7 @@
 from __future__ import annotations
 import logging
 
-from . import FuelCompanyBase
+from . import FuelCompanyBase, FuelStation
 
 from ..exceptions import ProductNotFoundError, StationNotFoundError
 from ..const import DIESEL, OCTANE_92, OCTANE_95
@@ -86,14 +86,16 @@ class FuelCompany(FuelCompanyBase):
                 fuel_92_price = clean_value(cells[1].text)
                 fuel_95_price = clean_value(cells[2].text)
                 diesel_price = clean_value(cells[3].text)
+
                 self._stations.append(
-                    {
-                        "name": station_name,
-                        "address": station_address,
-                        "prices": {
+                    FuelStation(
+                        id=None,  # type: ignore
+                        name=station_name,
+                        address=station_address,
+                        prices={
                             OCTANE_92: fuel_92_price,
                             OCTANE_95: fuel_95_price,
                             DIESEL: diesel_price,
                         },
-                    }
+                    )
                 )
