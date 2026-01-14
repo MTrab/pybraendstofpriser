@@ -12,8 +12,8 @@ async def main():
     product = OCTANE_95
 
     companies = await braendstofpriser.list_companies()
-    company = "OIL! tank & go"
-    station = "OIL! tank & go Bolbro, Odense"
+    company = "Q8"
+    station = "Q8 Service, Randersvej"
     await braendstofpriser.set_company(company)
     stations = await braendstofpriser.list_stations(company)
     braendstofpriser.set_station(station)
