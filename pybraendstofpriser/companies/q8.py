@@ -50,17 +50,17 @@ class FuelCompany(FuelCompanyBase):
                         FuelStation(station_id, station_name, station_address, products)  # type: ignore
                     )
 
-            if isinstance(station["address"], type(None)):
+            if isinstance(station["address"], type(None)):  # type: ignore
                 continue
 
-            if not station["stationName"].startswith("Q8"):
+            if not station["stationName"].startswith("Q8"):  # type: ignore
                 # Not a Q8 station, skip this record
                 continue
 
-            station_id = station["stationId"]
-            arraddress = station["address"].split(" ")
-            station_name = station["stationName"] + ", " + arraddress[0]
-            prod = clean_product_name(station["products"][0]["productName"])
+            station_id = station["stationId"]  # type: ignore
+            arraddress = station["address"].split(" ")  # type: ignore
+            station_name = station["stationName"] + ", " + arraddress[0]  # type: ignore
+            prod = clean_product_name(station["products"][0]["productName"])  # type: ignore
             product = None
             for key, value in PRODUCTS.items():
                 if value["name"] == prod:
@@ -68,5 +68,5 @@ class FuelCompany(FuelCompanyBase):
                     break
 
             if not isinstance(product, type(None)):
-                price = clean_value(station["products"][0]["price"])
+                price = clean_value(station["products"][0]["price"])  # type: ignore
                 products.update({product: price})
