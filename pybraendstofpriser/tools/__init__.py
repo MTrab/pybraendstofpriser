@@ -1,8 +1,11 @@
 """Tools package for pybraendstofpriser."""
 
 from __future__ import annotations
+
 import logging
+
 import aiohttp
+import pandas as pd
 from bs4 import BeautifulSoup as BS
 
 _LOGGER = logging.getLogger(__name__)
@@ -49,6 +52,8 @@ def clean_value(value) -> float | None:
 
     value = value.replace("kr.", "").replace(",", ".").strip()
     try:
+        if value == "nan" or value == "":
+            return None
         return float(value)
     except ValueError:
         return None
@@ -69,3 +74,9 @@ async def download_file(
                         file.write(chunk)
     except aiohttp.ClientError as e:
         _LOGGER.error("Error downloading file from %s: %s", url, e)
+
+
+@staticmethod
+async def get_xls_file(url: str):
+    """Fetch XLS file from a URL asynchronously."""
+    return pd.read_excel(url)

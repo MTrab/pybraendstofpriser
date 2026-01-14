@@ -1,5 +1,6 @@
 """Constants for pybraendstofpriser."""
 
+BIO_DIESEL = "bio_diesel"
 DIESEL = "diesel"
 DIESEL_PLUS = "diesel_plus"
 OCTANE_92 = "octane_92"

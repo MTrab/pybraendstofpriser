@@ -8,7 +8,7 @@ class FuelCompanyBase:
 
     def __init__(self, products: dict) -> None:
         """Initialize the FuelCompany class."""
-        self._stations: list[dict] = []
+        self._stations: list[FuelStation] = []
         self.station: str | None = None
         self.products = products
 
@@ -33,3 +33,34 @@ class FuelCompanyBase:
     async def _load_stations(self) -> None:
         """Load fuel stations."""
         raise NotImplementedError
+
+
+class FuelStation:
+    """Fuel station class."""
+
+    def __init__(self, id: int, name: str, address: str, prices: dict) -> None:
+        """Initialize the FuelStation class."""
+        self._id = id
+        self._name = name
+        self._address = address
+        self._prices = prices
+
+    @property
+    def id(self) -> int:
+        """Get station ID."""
+        return self._id
+
+    @property
+    def name(self) -> str:
+        """Get station name."""
+        return self._name
+
+    @property
+    def address(self) -> str:
+        """Get station address."""
+        return self._address
+
+    @property
+    def prices(self) -> dict:
+        """Get station prices."""
+        return self._prices
