@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 import ssl
 
-from ..exceptions import ErrorFetchingProduct
+from ..exceptions import ProductNotFoundError
 from ..const import DIESEL, OCTANE_100, OCTANE_95, DIESEL_PLUS
 from ..tools import clean_product_name, clean_value, get_html_soup, get_website
 
@@ -53,4 +53,4 @@ class FuelCompany:
             if item["id"] == PRODUCTS[product]["ProductCode"]:
                 return clean_value(item["price_incl_vat"])
 
-        raise ErrorFetchingProduct(f"Product '{PRODUCTS[product]['name']}' not found")
+        raise ProductNotFoundError(f"Product '{PRODUCTS[product]['name']}' not found")

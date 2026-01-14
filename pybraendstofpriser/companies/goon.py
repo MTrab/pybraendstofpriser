@@ -48,6 +48,10 @@ class FuelCompany:
             f"Product '{PRODUCTS[product]['name']}' not found at station '{self.station}'"
         )
 
+    def get_product_name(self, product: str) -> str:
+        """Get product name."""
+        return PRODUCTS[product]["name"]
+
     async def list_products(self) -> list[str]:
         """List available fuel products."""
         if not self.__stations:
