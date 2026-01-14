@@ -3,7 +3,7 @@
 from __future__ import annotations
 import logging
 
-from ..exceptions import ErrorFetchingProduct
+from ..exceptions import ProductNotFoundError
 from ..const import DIESEL, OCTANE_95
 from ..tools import clean_product_name, clean_value, get_html_soup, get_website
 
@@ -47,4 +47,4 @@ class FuelCompany:
                 if found:
                     return clean_value(cells[1].text)
 
-        raise ErrorFetchingProduct(f"Product '{PRODUCTS[product]['name']}' not found")
+        raise ProductNotFoundError(f"Product '{PRODUCTS[product]['name']}' not found")
