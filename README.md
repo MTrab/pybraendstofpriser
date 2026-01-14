@@ -8,6 +8,7 @@ REQUIRES [SSOCR](https://www.unix-ag.uni-kl.de/~auerswal/ssocr/) installed
 
 ### These companies are currently available:
 
+*   [F24](https://www.f24.dk/)
 *   [Go'On](https://goon.nu)
 *   [OIL! tank & go](https://www.oil-tankstationer.dk)
 *   [OK](https://www.ok.dk)

@@ -1,4 +1,4 @@
-"""Q8 fetcher for pybraendstofpriser."""
+"""F24 fetcher for pybraendstofpriser."""
 
 from __future__ import annotations
 import logging
@@ -18,7 +18,7 @@ PRODUCTS = {
     OCTANE_92: {"name": "GoEasy 95 Extra E5"},
 }
 
-COMPANY_NAME = "Q8"
+COMPANY_NAME = "F24"
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -52,8 +52,8 @@ class FuelCompany(FuelCompanyBase):
             if isinstance(station["address"], type(None)):  # type: ignore
                 continue
 
-            if not station["stationName"].startswith("Q8"):  # type: ignore
-                # Not a Q8 station, skip this record
+            if not station["stationName"].startswith("F24"):  # type: ignore
+                # Not a F24 station, skip this record
                 continue
 
             station_id = station["stationId"]  # type: ignore
