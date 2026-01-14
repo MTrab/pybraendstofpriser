@@ -18,7 +18,7 @@ async def main():
     stations = await braendstofpriser.list_stations(company)
     braendstofpriser.set_station(station)
     products = await braendstofpriser.list_products()
-    price = await braendstofpriser.get_price(product)
+    price = braendstofpriser.get_price(product)
 
     print(
         f"{braendstofpriser.company.get_product_name(product)} at {station} costs {price:.2f} kr/liter"

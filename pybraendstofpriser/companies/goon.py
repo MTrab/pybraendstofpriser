@@ -1,21 +1,15 @@
 """Go'On fetcher for pybraendstofpriser."""
 
 from __future__ import annotations
+
 import logging
 
+from ..const import DIESEL, OCTANE_92, OCTANE_95
+from ..exceptions import ProductNotFoundError, StationNotFoundError
+from ..tools import clean_product_name, clean_value, get_html_soup, get_website
 from . import FuelCompanyBase, FuelStation
 
-from ..exceptions import ProductNotFoundError, StationNotFoundError
-from ..const import DIESEL, OCTANE_92, OCTANE_95
-from ..tools import (
-    clean_value,
-    clean_product_name,
-    get_html_soup,
-    get_website,
-)
-
-host = "https://goon.nu"
-baseurl = f"{host}"
+BASEURL = "https://goon.nu"
 
 PRODUCTS = {
     OCTANE_92: {"name": "Blyfri 92"},
@@ -35,16 +29,15 @@ class FuelCompany(FuelCompanyBase):
         """Initialize the FuelCompany class."""
         super().__init__(PRODUCTS)
 
-    async def fetch_price(self, product: str) -> float:
+    def fetch_price(self, product: str) -> float:
         """Fetch fuel prices."""
         for s in self._stations:
-            if s["name"] == self.station:
-                if s["prices"].get(product) is None:
+            if s.name == self.station:
+                if s.prices.get(product) is None:
                     raise ProductNotFoundError(
                         f"Product '{self.get_product_name(product)}' not found at station '{self.station}'"
                     )
-                return s["prices"].get(product)
-
+                return s.prices.get(product)  # type: ignore
         raise ProductNotFoundError(
             f"Product '{self.get_product_name(product)}' not found at station '{self.station}'"
         )
@@ -55,9 +48,9 @@ class FuelCompany(FuelCompanyBase):
             await self._load_stations()
 
         for s in self._stations:
-            if s["name"] == self.station:
+            if s.name == self.station:
                 retlist = []
-                for product, price in s["prices"].items():
+                for product, price in s.prices.items():
                     if price is not None:
                         retlist.append(PRODUCTS[product]["name"])
                 return retlist
@@ -68,7 +61,7 @@ class FuelCompany(FuelCompanyBase):
 
     async def _load_stations(self) -> None:
         """Load fuel stations."""
-        r = await get_website(baseurl, timeout=20)
+        r = await get_website(BASEURL, timeout=20)
         html = get_html_soup(r)
         station_set = html.find_all("div", {"class": "table-scroll-wrapper"})
         stations = station_set[0].find_all("tr")

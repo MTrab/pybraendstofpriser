@@ -75,13 +75,13 @@ class Braendstofpriser:
         _LOGGER.debug("Setting station to %s", station)
         self.company.station = station
 
-    async def get_price(self, product: str):
+    def get_price(self, product: str):
         """Get fuel price for a specific company and product."""
         if self.company is None:
             raise ValueError("Company not set. Please set a company first.")
 
         _LOGGER.debug("Getting price for %s", product)
-        return await self.company.fetch_price(product)
+        return self.company.fetch_price(product)
 
     async def list_stations(self, company: str):
         """List fuel stations for a specific company."""
