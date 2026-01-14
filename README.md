@@ -14,3 +14,9 @@ REQUIRES [SSOCR](https://www.unix-ag.uni-kl.de/~auerswal/ssocr/) installed
 *   [OK](https://www.ok.dk)
 *   [Q8](https://www.q8.dk)
 *   [Shell](https://shellservice.dk)
+
+### These companies are currently not available in this module:
+
+*   UnoX
+*   ingo
+*   CircleK
