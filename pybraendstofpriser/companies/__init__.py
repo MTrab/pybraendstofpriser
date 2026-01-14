@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from ..exceptions import ProductNotFoundError
+
 
 class FuelCompanyBase:
     """Fuel company base class."""
@@ -16,19 +18,31 @@ class FuelCompanyBase:
         """Get product name."""
         return self.products[product]["name"]
 
-    def fetch_price(self, product: str) -> float | None:
+    def fetch_price(self, product: str) -> float:
         """Fetch fuel prices."""
-        raise NotImplementedError
+        for s in self._stations:
+            if s.name == self.station:
+                if s.prices.get(product) is None:
+                    raise ProductNotFoundError(
+                        f"Product '{self.products[product]['name']}' not found at station '{self.station}'"
+                    )
+                return s.prices.get(product)  # type: ignore
+        raise ProductNotFoundError(
+            f"Product '{self.products[product]['name']}' not found at station '{self.station}'"
+        )
 
     async def list_products(self) -> list[str]:
         """List available fuel products."""
-        raise NotImplementedError
+        retlist = []
+        for _, product_dict in self.products.items():
+            retlist.append(product_dict["name"])
+        return retlist
 
     async def list_stations(self) -> list[dict]:
         """List available fuel stations."""
         if not self._stations:
             await self._load_stations()
-        return self._stations
+        return self._stations  # type: ignore
 
     async def _load_stations(self) -> None:
         """Load fuel stations."""

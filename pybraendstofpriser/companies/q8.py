@@ -3,15 +3,20 @@
 from __future__ import annotations
 import logging
 
+from . import FuelCompanyBase, FuelStation
+
 from ..exceptions import ProductNotFoundError
-from ..const import DIESEL, OCTANE_95
+from ..const import BIO_DIESEL, DIESEL, DIESEL_PLUS, OCTANE_92, OCTANE_95
 from ..tools import clean_product_name, clean_value, get_html_soup, get_website
 
-baseurl = "https://www.q8.dk/paa-stationen/braendstof/"
+BASEURL = "https://beta.q8.dk/Station/GetStationPrices?pageSize=5000"
 
 PRODUCTS = {
-    DIESEL: {"name": "Q8 GoEasy Diesel"},
-    OCTANE_95: {"name": "Q8 GoEasy 95 E10"},
+    DIESEL: {"name": "GoEasy Diesel"},
+    DIESEL_PLUS: {"name": "GoEasy Diesel Extra"},
+    BIO_DIESEL: {"name": "Neste MY (HVO100)"},
+    OCTANE_95: {"name": "GoEasy 95 E10"},
+    OCTANE_92: {"name": "GoEasy 95 Extra E5"},
 }
 
 COMPANY_NAME = "Q8"
@@ -19,31 +24,49 @@ COMPANY_NAME = "Q8"
 _LOGGER = logging.getLogger(__name__)
 
 
-class FuelCompany:
+class FuelCompany(FuelCompanyBase):
     """Fuel company class."""
 
-    async def fetch_price(self, product: str) -> float | None:
-        """Fetch fuel prices."""
-        return await self._parser(product)
+    def __init__(self) -> None:
+        """Initialize the FuelCompany class."""
+        super().__init__(PRODUCTS)
 
-    async def list_products(self) -> list[str]:
-        """List available fuel products."""
-        retlist = []
-        for _, productDict in PRODUCTS.items():
-            retlist.append(productDict["name"])
-        return retlist
+    async def _load_stations(self) -> None:
+        """Load fuel stations."""
+        self._stations.clear()
+        r = await get_website(BASEURL, timeout=10, as_json=True)
+        stations = r["data"]["stationsPrices"]  # type: ignore
 
-    async def _parser(self, product) -> float | None:
-        """Parse the fetched data."""
-        r = await get_website(baseurl, timeout=5)
-        html = get_html_soup(r)
-        rows = html.find_all("li", class_="price-item")
+        station_id = None
+        station_name = None
+        station_address = None
+        products = {}
 
-        for row in rows:
-            cells = row.text.split("\r")
-            if cells:
-                found = PRODUCTS[product]["name"] == clean_product_name(cells[0])
-                if found:
-                    return clean_value(cells[1])
+        for station in stations:  # type: ignore
 
-        raise ProductNotFoundError(f"Product '{PRODUCTS[product]['name']}' not found")
+            if not isinstance(station_id, type(None)):
+                if station_id != station["stationId"]:  # type: ignore
+                    self._stations.append(
+                        FuelStation(station_id, station_name, station_address, products)  # type: ignore
+                    )
+
+            if isinstance(station["address"], type(None)):
+                continue
+
+            if not station["stationName"].startswith("Q8"):
+                # Not a Q8 station, skip this record
+                continue
+
+            station_id = station["stationId"]
+            arraddress = station["address"].split(" ")
+            station_name = station["stationName"] + ", " + arraddress[0]
+            prod = clean_product_name(station["products"][0]["productName"])
+            product = None
+            for key, value in PRODUCTS.items():
+                if value["name"] == prod:
+                    product = key
+                    break
+
+            if not isinstance(product, type(None)):
+                price = clean_value(station["products"][0]["price"])
+                products.update({product: price})

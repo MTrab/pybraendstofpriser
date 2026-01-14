@@ -29,36 +29,6 @@ class FuelCompany(FuelCompanyBase):
         """Initialize the FuelCompany class."""
         super().__init__(PRODUCTS)
 
-    def fetch_price(self, product: str) -> float:
-        """Fetch fuel prices."""
-        for s in self._stations:
-            if s.name == self.station:
-                if s.prices.get(product) is None:
-                    raise ProductNotFoundError(
-                        f"Product '{self.get_product_name(product)}' not found at station '{self.station}'"
-                    )
-                return s.prices.get(product)  # type: ignore
-        raise ProductNotFoundError(
-            f"Product '{self.get_product_name(product)}' not found at station '{self.station}'"
-        )
-
-    async def list_products(self) -> list[str]:
-        """List available fuel products."""
-        if not self._stations:
-            await self._load_stations()
-
-        for s in self._stations:
-            if s.name == self.station:
-                retlist = []
-                for product, price in s.prices.items():
-                    if price is not None:
-                        retlist.append(PRODUCTS[product]["name"])
-                return retlist
-
-        raise StationNotFoundError(
-            f"Station '{self.station}' not found. Cannot list products."
-        )
-
     async def _load_stations(self) -> None:
         """Load fuel stations."""
         r = await get_website(BASEURL, timeout=20)
