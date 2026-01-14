@@ -10,6 +10,8 @@ from os import listdir
 from posixpath import dirname
 import sys
 
+from .companies import FuelCompanyBase
+
 if sys.version_info < (3, 11, 0):
     sys.exit("The pybraendstofpriser module requires Python 3.11.0 or later")
 
@@ -24,7 +26,7 @@ class Braendstofpriser:
         """Initialize the Braendstofpriser class."""
         # self.companies = []
         self.companies = {}
-        self.company = None
+        self.company: FuelCompanyBase
 
         _LOGGER.debug("Braendstofpriser initialized")
 

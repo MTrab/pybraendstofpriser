@@ -7,6 +7,8 @@
 from __future__ import annotations
 import logging
 
+from . import FuelCompanyBase
+
 from ..exceptions import ProductNotFoundError
 from ..const import DIESEL, OCTANE_100, OCTANE_95
 from ..tools import clean_product_name, clean_value, get_html_soup, get_website
@@ -24,17 +26,16 @@ COMPANY_NAME = "OK"
 _LOGGER = logging.getLogger(__name__)
 
 
-class FuelCompany:
+class FuelCompany(FuelCompanyBase):
     """Fuel company class."""
 
     def __init__(self) -> None:
         """Initialize the FuelCompany class."""
-        self.__stations: list[dict] = []
-        self.station: str | None = None
+        super().__init__(PRODUCTS)
 
     async def fetch_price(self, product: str) -> float:
         """Fetch fuel prices."""
-        for s in self.__stations:
+        for s in self._stations:
             if s["name"] == self.station:
                 if s["prices"].get(product) is None:
                     raise ProductNotFoundError(
@@ -57,14 +58,9 @@ class FuelCompany:
         """Get product name."""
         return PRODUCTS[product]["name"]
 
-    async def list_stations(self) -> list[dict]:
-        """List available fuel stations."""
-        if not self.__stations:
-            await self._load_stations()
-        return self.__stations
-
     async def _load_stations(self) -> None:
         """Load fuel stations."""
+        self._stations.clear()
         r = await get_website(baseurl, timeout=5, as_json=True)
         stations = r["tankstationer"]
 
@@ -90,7 +86,7 @@ class FuelCompany:
                     fuel_100_price = clean_value(product["pris"])
                 elif product["navn"] == PRODUCTS[DIESEL]["name"]:
                     diesel_price = clean_value(product["pris"])
-            self.__stations.append(
+            self._stations.append(
                 {
                     "name": station_name,
                     "address": station_address,
