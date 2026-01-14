@@ -1,56 +1,63 @@
 """Shell fetcher for pybraendstofpriser."""
 
 from __future__ import annotations
+
 import logging
-import ssl
 
-from ..exceptions import ProductNotFoundError
-from ..const import DIESEL, OCTANE_100, OCTANE_95, DIESEL_PLUS
-from ..tools import clean_product_name, clean_value, get_html_soup, get_website
+from ..const import DIESEL, DIESEL_PLUS, OCTANE_95, OCTANE_100
+from ..tools import clean_product_name, clean_value, get_xls_file
+from . import FuelCompanyBase, FuelStation
 
-baseurl = "https://shellservice.dk/wp-json/shell-wp/v2/daily-prices"
+BASEURL = "https://shellservice.dk/wp-content/uploads/sites/2/2026/01/dk-prices-14.01.2026.xlsx"
 
 PRODUCTS = {
-    DIESEL: {"name": "Shell FuelSave Diesel", "ProductCode": "315000"},
-    DIESEL_PLUS: {"name": "Shell V-Power Diesel", "ProductCode": "325000"},
-    OCTANE_95: {"name": "Shell FuelSave 95 oktan", "ProductCode": "475000"},
-    OCTANE_100: {"name": "Shell V-Power 100 oktan", "ProductCode": "465000"},
+    DIESEL: {"name": "Shell FuelSave Diesel"},
+    DIESEL_PLUS: {"name": "Shell V-Power Diesel"},
+    OCTANE_95: {"name": "Shell FuelSave 95 oktan"},
+    OCTANE_100: {"name": "Shell V-Power 100 oktan"},
 }
 
 COMPANY_NAME = "Shell"
 
 _LOGGER = logging.getLogger(__name__)
 
-# Create the SSL context globally to reuse it
-SSL_CONTEXT = ssl.create_default_context()
-SSL_CONTEXT.minimum_version = ssl.TLSVersion.TLSv1_3
-SSL_CONTEXT.maximum_version = ssl.TLSVersion.TLSv1_3
 
-
-class FuelCompany:
+class FuelCompany(FuelCompanyBase):
     """Fuel company class."""
 
-    async def fetch_price(self, product: str) -> float | None:
-        """Fetch fuel prices."""
-        return await self._parser(product)
+    def __init__(self) -> None:
+        """Initialize the FuelCompany class."""
+        super().__init__(PRODUCTS)
 
-    async def list_products(self) -> list[str]:
-        """List available fuel products."""
-        retlist = []
-        for _, productDict in PRODUCTS.items():
-            retlist.append(productDict["name"])
-        return retlist
+    async def _load_stations(self) -> None:
+        """Load fuel stations."""
+        station_list = await get_xls_file(BASEURL)
+        for row in station_list.itertuples():
+            if not isinstance(row[2], str):
+                continue
 
-    async def _parser(self, product) -> float | None:
-        """Parse the fetched data."""
-        headers = {"User-Agent": "pybraendstofpriser"}
-        r = await get_website(
-            baseurl, timeout=5, as_json=True, headers=headers, ssl_context=SSL_CONTEXT
-        )
-        prod_data = r["results"]["products"]
+            if not row[1].startswith("Shell"):  # Only iterate over valid stations
+                continue
 
-        for item in prod_data:
-            if item["id"] == PRODUCTS[product]["ProductCode"]:
-                return clean_value(item["price_incl_vat"])
-
-        raise ProductNotFoundError(f"Product '{PRODUCTS[product]['name']}' not found")
+            station_id = row[0] if isinstance(row[0], int) else None
+            station_name = clean_product_name(row[1])
+            station_address = clean_product_name(
+                str(row[2]) + " " + str(row[3]) + " " + str(row[4])
+            )
+            fs95_price = clean_value(str(row[5]))
+            vp100_price = clean_value(str(row[6]))
+            fsd_price = clean_value(str(row[7]))
+            vpd_price = clean_value(str(row[8]))
+            self._stations.append(
+                FuelStation(
+                    id=station_id,  # type: ignore
+                    name=station_name,
+                    address=station_address,
+                    prices={
+                        OCTANE_95: fs95_price,
+                        OCTANE_100: vp100_price,
+                        DIESEL: fsd_price,
+                        DIESEL_PLUS: vpd_price,
+                    },
+                )
+            )
