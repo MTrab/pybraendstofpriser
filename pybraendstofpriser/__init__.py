@@ -1,14 +1,16 @@
 """Defines the pybraendstofpriser package."""
 
 from __future__ import annotations
-from asyncio import get_running_loop
-from collections import namedtuple
-from genericpath import isfile
+
 import importlib
 import logging
+import sys
+from asyncio import get_running_loop
+from collections import namedtuple
 from os import listdir
 from posixpath import dirname
-import sys
+
+from genericpath import isfile
 
 from .companies import FuelCompanyBase
 
@@ -24,7 +26,6 @@ class Braendstofpriser:
 
     def __init__(self):
         """Initialize the Braendstofpriser class."""
-        # self.companies = []
         self.companies = {}
         self.company: FuelCompanyBase
 

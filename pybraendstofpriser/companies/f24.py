@@ -1,12 +1,10 @@
 """F24 fetcher for pybraendstofpriser."""
 
 from __future__ import annotations
-import logging
-
-from . import FuelCompanyBase, FuelStation
 
 from ..const import BIO_DIESEL, DIESEL, DIESEL_PLUS, OCTANE_92, OCTANE_95
 from ..tools import clean_product_name, clean_value, get_website
+from . import FuelCompanyBase, FuelStation
 
 BASEURL = "https://beta.q8.dk/Station/GetStationPrices?pageSize=5000"
 
@@ -19,8 +17,6 @@ PRODUCTS = {
 }
 
 COMPANY_NAME = "F24"
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class FuelCompany(FuelCompanyBase):
@@ -46,7 +42,12 @@ class FuelCompany(FuelCompanyBase):
             if not isinstance(station_id, type(None)):
                 if station_id != station["stationId"]:  # type: ignore
                     self._stations.append(
-                        FuelStation(station_id, station_name, station_address, products)  # type: ignore
+                        FuelStation(
+                            station_id,  # type: ignore
+                            station_name,  # type: ignore
+                            station_address,  # type: ignore
+                            products,
+                        )
                     )
 
             if isinstance(station["address"], type(None)):  # type: ignore

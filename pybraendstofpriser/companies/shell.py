@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import logging
-
 from ..const import DIESEL, DIESEL_PLUS, OCTANE_95, OCTANE_100
 from ..tools import clean_product_name, clean_value, get_xls_file
 from . import FuelCompanyBase, FuelStation
@@ -18,8 +16,6 @@ PRODUCTS = {
 }
 
 COMPANY_NAME = "Shell"
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class FuelCompany(FuelCompanyBase):
@@ -50,7 +46,7 @@ class FuelCompany(FuelCompanyBase):
             vpd_price = clean_value(str(row[8]))
             self._stations.append(
                 FuelStation(
-                    id=station_id,  # type: ignore
+                    sid=station_id,  # type: ignore
                     name=station_name,
                     address=station_address,
                     prices={

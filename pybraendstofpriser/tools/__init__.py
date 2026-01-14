@@ -22,7 +22,11 @@ async def get_website(
     """Fetch content from a website asynchronously."""
     try:
         async with aiohttp.ClientSession(headers=headers) as session:
-            async with session.get(url, timeout=timeout, ssl=ssl_context) as response:
+            async with session.get(
+                url,
+                timeout=timeout,  # pyright: ignore[reportArgumentType]
+                ssl=ssl_context,  # pyright: ignore[reportArgumentType]
+            ) as response:
                 response.raise_for_status()
                 return await response.text() if not as_json else await response.json()
     except aiohttp.ClientError as e:
@@ -37,11 +41,11 @@ def get_html_soup(r, parser="html.parser"):
 
 
 @staticmethod
-def clean_product_name(productName):
+def clean_product_name(product_name):
     """Clean and standardize product name."""
-    productName = productName.replace("Beskrivelse: ", "")
-    productName = productName.strip()
-    return productName
+    product_name = product_name.replace("Beskrivelse: ", "")
+    product_name = product_name.strip()
+    return product_name
 
 
 @staticmethod
@@ -66,7 +70,9 @@ async def download_file(
     """Download a file asynchronously using aiohttp."""
     try:
         async with aiohttp.ClientSession(headers=headers) as session:
-            async with session.get(url, ssl=ssl_context) as response:
+            async with session.get(
+                url, ssl=ssl_context  # pyright: ignore[reportArgumentType]
+            ) as response:
                 response.raise_for_status()
                 full_path = path + filename
                 with open(full_path, "wb") as file:

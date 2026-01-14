@@ -24,7 +24,8 @@ class FuelCompanyBase:
             if s.name == self.station:
                 if s.prices.get(product) is None:
                     raise ProductNotFoundError(
-                        f"Product '{self.products[product]['name']}' not found at station '{self.station}'"
+                        f"Product '{self.products[product]['name']}'"
+                        f" not found at station '{self.station}'"
                     )
                 return s.prices.get(product)  # type: ignore
         raise ProductNotFoundError(
@@ -52,9 +53,9 @@ class FuelCompanyBase:
 class FuelStation:
     """Fuel station class."""
 
-    def __init__(self, id: int, name: str, address: str, prices: dict) -> None:
+    def __init__(self, sid: int, name: str, address: str, prices: dict) -> None:
         """Initialize the FuelStation class."""
-        self._id = id
+        self._id = sid
         self._name = name
         self._address = address
         self._prices = prices
