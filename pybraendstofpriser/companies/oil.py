@@ -6,14 +6,10 @@ import logging
 
 from ..const import BIO_DIESEL, DIESEL, OCTANE_95
 from ..exceptions import ProductNotFoundError, StationNotFoundError
-from ..tools import (
-    clean_product_name,
-    clean_value,
-    get_xls_file,
-)
+from ..tools import clean_product_name, clean_value, get_xls_file
 from . import FuelCompanyBase, FuelStation
 
-baseurl = "https://www.oil-tankstationer.dk/fileadmin/user_upload/dk/downloads-dk/OIL-DK_Priser-Privat_Gaeldende-priser_website_Excel.xlsx"
+BASEURL = "https://www.oil-tankstationer.dk/fileadmin/user_upload/dk/downloads-dk/OIL-DK_Priser-Privat_Gaeldende-priser_website_Excel.xlsx"
 
 PRODUCTS = {
     DIESEL: {"name": "Diesel B7"},
@@ -35,7 +31,7 @@ class FuelCompany(FuelCompanyBase):
 
     async def _load_stations(self) -> None:
         """Load fuel stations."""
-        station_list = await get_xls_file(baseurl)
+        station_list = await get_xls_file(BASEURL)
         for row in station_list.itertuples():
             if not isinstance(row._2, str):
                 continue
@@ -79,7 +75,7 @@ class FuelCompany(FuelCompanyBase):
             f"Station '{self.station}' not found. Cannot list products."
         )
 
-    async def fetch_price(self, product: str) -> float:
+    def fetch_price(self, product: str) -> float:
         """Fetch fuel prices."""
         for s in self._stations:
             if s.name == self.station:
@@ -87,7 +83,7 @@ class FuelCompany(FuelCompanyBase):
                     raise ProductNotFoundError(
                         f"Product '{self.get_product_name(product)}' not found at station '{self.station}'"
                     )
-                return s.prices.get(product)
+                return s.prices.get(product, None)  # type: ignore
 
         raise ProductNotFoundError(
             f"Product '{self.get_product_name(product)}' not found at station '{self.station}'"

@@ -16,7 +16,7 @@ class FuelCompanyBase:
         """Get product name."""
         return self.products[product]["name"]
 
-    async def fetch_price(self, product: str) -> float | None:
+    def fetch_price(self, product: str) -> float | None:
         """Fetch fuel prices."""
         raise NotImplementedError
 
