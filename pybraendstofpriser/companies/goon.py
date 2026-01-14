@@ -35,7 +35,6 @@ class FuelCompany(FuelCompanyBase):
         """Initialize the FuelCompany class."""
         super().__init__(PRODUCTS)
 
-
     async def fetch_price(self, product: str) -> float:
         """Fetch fuel prices."""
         for s in self._stations:
