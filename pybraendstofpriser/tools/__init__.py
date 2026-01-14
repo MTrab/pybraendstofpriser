@@ -64,25 +64,6 @@ def clean_value(value) -> float | None:
 
 
 @staticmethod
-async def download_file(
-    url: str, filename: str, path: str, headers: dict | None = None, ssl_context=None
-):
-    """Download a file asynchronously using aiohttp."""
-    try:
-        async with aiohttp.ClientSession(headers=headers) as session:
-            async with session.get(
-                url, ssl=ssl_context  # pyright: ignore[reportArgumentType]
-            ) as response:
-                response.raise_for_status()
-                full_path = path + filename
-                with open(full_path, "wb") as file:
-                    async for chunk in response.content.iter_chunked(1024):
-                        file.write(chunk)
-    except aiohttp.ClientError as e:
-        _LOGGER.error("Error downloading file from %s: %s", url, e)
-
-
-@staticmethod
 async def get_xls_file(url: str):
     """Fetch XLS file from a URL asynchronously."""
     return pd.read_excel(url)
