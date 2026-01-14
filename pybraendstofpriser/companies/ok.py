@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import logging
-
 from ..const import DIESEL, OCTANE_95, OCTANE_100
-from ..exceptions import ProductNotFoundError
 from ..tools import clean_product_name, clean_value, get_website
 from . import FuelCompanyBase, FuelStation
 
@@ -18,8 +15,6 @@ PRODUCTS = {
 }
 
 COMPANY_NAME = "OK"
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class FuelCompany(FuelCompanyBase):
@@ -61,7 +56,7 @@ class FuelCompany(FuelCompanyBase):
 
             self._stations.append(
                 FuelStation(
-                    id=station_id,  # type: ignore
+                    sid=station_id,  # type: ignore
                     name=station_name,
                     address=station_address,
                     prices={
