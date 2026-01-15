@@ -64,6 +64,9 @@ class Braendstofpriser:
 
     async def set_company(self, company: str):
         """Set the fuel company."""
+        if len(self.companies) == 0:
+            await self.list_companies()
+
         _LOGGER.debug("Setting company to %s", company)
         c = await self._load_module(self.companies[company]["namespace"])
         self.company = c.FuelCompany()
@@ -84,12 +87,12 @@ class Braendstofpriser:
         _LOGGER.debug("Getting price for %s", product)
         return self.company.fetch_price(product)
 
-    async def list_stations(self, company: str):
+    async def list_stations(self):
         """List fuel stations for a specific company."""
         if self.company is None:
             raise ValueError("Company not set. Please set a company first.")
 
-        _LOGGER.debug("Listing stations for %s", company)
+        _LOGGER.debug("Listing stations for %s", self.company)
         return await self.company.list_stations()
 
     async def list_products(self):

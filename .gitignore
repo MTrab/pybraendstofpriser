@@ -12,3 +12,6 @@ coverage.xml
 notes.txt
 testbild.png
 .venv
+
+# Optional: fixtures
+tests/fixtures/*.*

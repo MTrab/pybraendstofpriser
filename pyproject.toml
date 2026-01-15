@@ -17,3 +17,14 @@ openpyxl = "^3.1.5"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.0"
+pytest-mock = "^3.15.1"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+markers = [
+    "live: tests that fetch real data from external websites",
+]

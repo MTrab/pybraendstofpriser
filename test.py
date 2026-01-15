@@ -1,6 +1,7 @@
 """Test file for pybraendstofpriser module."""
 
 import asyncio
+import random
 
 from pybraendstofpriser import Braendstofpriser
 from pybraendstofpriser.const import DIESEL, OCTANE_92, OCTANE_95
@@ -13,9 +14,9 @@ async def main():
 
     companies = await braendstofpriser.list_companies()
     company = "Shell"
-    station = "Shell Billund"
     await braendstofpriser.set_company(company)
-    stations = await braendstofpriser.list_stations(company)
+    stations = await braendstofpriser.list_stations()
+    station = (random.choice(stations)).name
     braendstofpriser.set_station(station)
     products = await braendstofpriser.list_products()
     price = braendstofpriser.get_price(product)
