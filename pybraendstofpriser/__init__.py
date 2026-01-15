@@ -13,6 +13,7 @@ from posixpath import dirname
 from genericpath import isfile
 
 from .companies import FuelCompanyBase
+from .exceptions import StationNotFoundError
 
 if sys.version_info < (3, 11, 0):
     sys.exit("The pybraendstofpriser module requires Python 3.11.0 or later")
@@ -71,13 +72,19 @@ class Braendstofpriser:
         c = await self._load_module(self.companies[company]["namespace"])
         self.company = c.FuelCompany()
 
-    def set_station(self, station: str):
+    async def set_station(self, station: str):
         """Set the fuel station for the current company."""
         if self.company is None:
             raise ValueError("Company not set. Please set a company first.")
 
-        _LOGGER.debug("Setting station to %s", station)
-        self.company.station = station
+        stations = await self.company.list_stations()
+        for s in stations:
+            if s.name == station:
+                _LOGGER.debug("Setting station to %s", station)
+                self.company.station = station
+                return
+
+        raise StationNotFoundError(f"{station} was not found at {self.company}")
 
     def get_price(self, product: str):
         """Get fuel price for a specific company and product."""

@@ -13,6 +13,7 @@ class FuelCompanyBase:
         self._stations: list[FuelStation] = []
         self.station: str | None = None
         self.products = products
+        self._station_obj: FuelStation
 
     def get_product_name(self, product: str) -> str:
         """Get product name."""
@@ -35,8 +36,13 @@ class FuelCompanyBase:
     async def list_products(self) -> list[str]:
         """List available fuel products."""
         retlist = []
-        for _, product_dict in self.products.items():
-            retlist.append(product_dict["name"])
+        for s in self._stations:
+            if s.name == self.station:
+                for product, price in s.prices.items():
+                    if not isinstance(price, type(None)):
+                        retlist.append(product)
+                break
+
         return retlist
 
     async def list_stations(self) -> list[dict]:

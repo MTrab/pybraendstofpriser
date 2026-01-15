@@ -1,6 +1,5 @@
-"""Fixtures for the pybraendstofpriser test suite."""
-
 import json
+import pandas as pd
 from pathlib import Path
 import pytest
 from pybraendstofpriser import Braendstofpriser
@@ -8,37 +7,38 @@ from pybraendstofpriser import Braendstofpriser
 
 @pytest.fixture
 def api():
-    """Provide an instance of the Braendstofpriser API client."""
+    """Standard initialization of the API client."""
     return Braendstofpriser()
 
 
 @pytest.fixture
 def load_fixture():
-    """
-    Load data from the fixtures directory.
-
-    Returns:
-        - dict/list: If the file is a .json file.
-        - bytes: If the file is an .xls or .xlsx file (Excel).
-        - str: For all other file types (HTML, text).
-    """
-
     def _load(filename):
-        # Locate the file in the fixtures subdirectory
         fixture_path = Path(__file__).parent / "fixtures" / filename
 
         if not fixture_path.exists():
-            raise FileNotFoundError(f"Fixture file not found: {fixture_path}")
+            for ext in [".csv", ".xlsx", ".xls", ".html"]:
+                alt_path = fixture_path.with_suffix(ext)
+                if alt_path.exists():
+                    fixture_path = alt_path
+                    break
+            else:
+                raise FileNotFoundError(f"Fixture {filename} not found.")
 
-        # Handle binary Excel files
-        if filename.endswith((".xls", ".xlsx")):
-            return fixture_path.read_bytes()
+        # 1. Handle JSON/HTML/Text
+        if fixture_path.suffix == ".json":
+            return json.loads(fixture_path.read_text(encoding="utf-8"))
+        if fixture_path.suffix == ".html" or "goon" in filename:
+            return fixture_path.read_text(encoding="utf-8")
 
-        # Handle text-based files
-        content = fixture_path.read_text(encoding="utf-8")
-        if filename.endswith(".json"):
-            return json.loads(content)
+        content = fixture_path.read_bytes()
 
-        return content
+        # 2. Try Excel Parsing
+        if fixture_path.suffix in [".xlsx", ".xls"]:
+            return pd.read_excel(fixture_path)
+
+        raise ValueError(
+            f"Failed to parse {filename}. The file format or headers are unrecognized."
+        )
 
     return _load

@@ -29,11 +29,11 @@ SITES = {
     },
     "oil": {
         "url": "https://www.oil-tankstationer.dk/fileadmin/user_upload/dk/downloads-dk/OIL-DK_Priser-Privat_Gaeldende-priser_website_Excel.xlsx",
-        "type": "xls",
+        "type": "xlsx",
     },
     "shell": {
         "url": "https://shellservice.dk/wp-content/uploads/sites/2/2026/01/dk-prices-14.01.2026.xlsx",
-        "type": "xls",
+        "type": "xlsx",
     },
     "goon": {"url": "https://goon.nu", "type": "html"},
 }
@@ -52,8 +52,17 @@ def dump(name: str, url: str, ext_type: str) -> None:
     response = requests.get(url, headers=HEADERS, timeout=20)
     response.raise_for_status()
 
+    # Define which extensions should be handled as binary
+    BINARY_EXTENSIONS = {"xlsx", "xls", "zip", "png", "jpg"}
+
     out = FIXTURES_DIR / f"{name}.{ext_type}"
-    out.write_text(response.text, encoding="utf-8")
+
+    if ext_type in BINARY_EXTENSIONS:
+        # .content returns raw bytes, which is required for ZIP-based files like XLSX
+        out.write_bytes(response.content)
+    else:
+        # .text returns a string, which is appropriate for JSON, HTML, etc.
+        out.write_text(response.text, encoding="utf-8")
 
     print(f"Saved → {out}")
 

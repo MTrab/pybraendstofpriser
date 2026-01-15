@@ -4,25 +4,25 @@ import asyncio
 import random
 
 from pybraendstofpriser import Braendstofpriser
-from pybraendstofpriser.const import DIESEL, OCTANE_92, OCTANE_95
 
 
 async def main():
     """Main test function."""
     braendstofpriser = Braendstofpriser()
-    product = OCTANE_95
 
     companies = await braendstofpriser.list_companies()
-    company = "Shell"
+    company = random.choice(list(companies.keys()))
     await braendstofpriser.set_company(company)
     stations = await braendstofpriser.list_stations()
     station = (random.choice(stations)).name
-    braendstofpriser.set_station(station)
+    await braendstofpriser.set_station(station)
     products = await braendstofpriser.list_products()
+    product = random.choice(products)
+
     price = braendstofpriser.get_price(product)
 
     print(
-        f"{braendstofpriser.company.get_product_name(product)} at {station} costs {price:.2f} kr/liter"
+        f"{company} product {braendstofpriser.company.get_product_name(product)} at {station} costs {price:.2f} kr/liter"
     )
 
 
