@@ -29,7 +29,8 @@ class FuelCompany(FuelCompanyBase):
         """Load fuel stations."""
         station_list = await get_xls_file(BASEURL)
         for row in station_list.itertuples():
-            if not isinstance(row[2], str):
+            # Ensure row[2] (Address) and row[1] (Name) are valid strings
+            if not isinstance(row[2], str) or not isinstance(row[1], str):
                 continue
 
             if not row[1].startswith("Shell"):  # Only iterate over valid stations

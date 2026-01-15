@@ -18,3 +18,25 @@ This is a PyPI module for fetching/scraping fuel prices from Danish suppliers, p
 *   UnoX
 *   ingo
 *   CircleK
+
+## Testing
+
+This project uses pytest for testing. The suite is divided into two categories to ensure both reliability and real-world accuracy.
+
+### Test Types
+
+Unit Tests (Offline): These tests use local data dumps (fixtures) located in tests/fixtures/. They verify the parsing logic without requiring an internet connection.
+
+Live Tests: These tests perform actual network requests to verify that fuel company websites are reachable and that their data structures haven't changed.
+
+### Running the Tests
+
+To run the standard test suite (recommended for CI and PRs):
+```bash
+poetry run pytest -v -m "not live"
+```
+
+To run the live integration tests (Do NOT run these from CI):
+```bash
+poetry run pytest -v
+```
