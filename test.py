@@ -16,11 +16,10 @@ async def main():
     await braendstofpriser.set_company(company)
     stations = await braendstofpriser.list_stations()
     station = (random.choice(stations)).name
-    await braendstofpriser.set_station(station)
-    products = await braendstofpriser.list_products()
+    products = await braendstofpriser.list_products(station)
     product = random.choice(products)
 
-    price = braendstofpriser.get_price(product)
+    price = braendstofpriser.get_price(station, product)
 
     print(
         f"{company} product {braendstofpriser.company.get_product_name(product)} at {station} costs {price:.2f} kr/liter"

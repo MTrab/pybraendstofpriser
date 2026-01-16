@@ -73,12 +73,13 @@ async def test_live_fetch_all_companies(api, company_name, _, __, ___):
     stations = await api.list_stations()
     assert len(stations) > 0, f"No live stations found for {company_name}"
 
-    selected_station = random.choice(stations)
-    await api.set_station(selected_station.name)
+    station = (random.choice(stations)).name
 
-    products = await api.list_products()
+    products = await api.list_products(station)
+    assert len(products) > 0, f"No products found for {station} at {company_name}"
+
     product = random.choice(products)
-    price = api.get_price(product)
+    price = api.get_price(station, product)
 
     assert isinstance(price, float), f"Price for {company_name} is not a float"
     assert price > 0, f"Price for {company_name} must be greater than 0"

@@ -72,27 +72,13 @@ class Braendstofpriser:
         c = await self._load_module(self.companies[company]["namespace"])
         self.company = c.FuelCompany()
 
-    async def set_station(self, station: str):
-        """Set the fuel station for the current company."""
-        if self.company is None:
-            raise ValueError("Company not set. Please set a company first.")
-
-        stations = await self.company.list_stations()
-        for s in stations:
-            if s.name == station:
-                _LOGGER.debug("Setting station to %s", station)
-                self.company.station = station
-                return
-
-        raise StationNotFoundError(f"{station} was not found at {self.company}")
-
-    def get_price(self, product: str):
+    def get_price(self, station: str, product: str):
         """Get fuel price for a specific company and product."""
         if self.company is None:
             raise ValueError("Company not set. Please set a company first.")
 
         _LOGGER.debug("Getting price for %s", product)
-        return self.company.fetch_price(product)
+        return self.company.fetch_price(station, product)
 
     async def list_stations(self):
         """List fuel stations for a specific company."""
@@ -102,13 +88,10 @@ class Braendstofpriser:
         _LOGGER.debug("Listing stations for %s", self.company)
         return await self.company.list_stations()
 
-    async def list_products(self):
+    async def list_products(self, station):
         """List fuel products for a specific company and station."""
-        if self.company.station is None:
-            raise ValueError("Station not set. Please set a station first.")
-
-        _LOGGER.debug("Listing products for %s", self.company.station)
-        return await self.company.list_products()
+        _LOGGER.debug("Listing products for %s", station)
+        return await self.company.list_products(station)
 
     @staticmethod
     async def _load_module(namespace: str):
