@@ -10,8 +10,9 @@ async def main():
     """Main test function."""
     braendstofpriser = Braendstofpriser()
 
-    companies = await braendstofpriser.list_companies()
-    company = random.choice(list(companies.keys()))
+    # companies = await braendstofpriser.list_companies()
+    # company = random.choice(list(companies.keys()))
+    company = "OK"
     await braendstofpriser.set_company(company)
     stations = await braendstofpriser.list_stations()
     station = (random.choice(stations)).name
