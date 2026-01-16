@@ -71,6 +71,7 @@ class Braendstofpriser:
         _LOGGER.debug("Setting company to %s", company)
         c = await self._load_module(self.companies[company]["namespace"])
         self.company = c.FuelCompany()
+        await self.company.list_stations()
 
     def get_price(self, station: str, product: str):
         """Get fuel price for a specific company and product."""

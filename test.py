@@ -13,13 +13,15 @@ async def main():
     def sorter(e):
         return e.name
 
-    companies = await braendstofpriser.list_companies()
-    company = random.choice(list(companies.keys()))
+    # companies = await braendstofpriser.list_companies()
+    # company = random.choice(list(companies.keys()))
+    company = "OK"
     await braendstofpriser.set_company(company)
     stations = await braendstofpriser.list_stations()
     stations.sort(key=sorter)
 
-    station = (random.choice(stations)).name
+    # station = (random.choice(stations)).name
+    station = "Voldby, Dolmervej"
     products = await braendstofpriser.list_products(station)
     product = random.choice(products)
 
