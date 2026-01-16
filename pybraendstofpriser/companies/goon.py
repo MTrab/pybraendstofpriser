@@ -7,6 +7,7 @@ from ..tools import clean_product_name, clean_value, get_html_soup, get_website
 from . import FuelCompanyBase, FuelStation
 
 BASEURL = "https://goon.nu"
+# TODO: Find location for stations
 
 PRODUCTS = {
     OCTANE_92: {"name": "Blyfri 92"},

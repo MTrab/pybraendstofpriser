@@ -7,6 +7,7 @@ from ..tools import clean_product_name, clean_value, get_xls_file
 from . import FuelCompanyBase, FuelStation
 
 BASEURL = "https://shellservice.dk/wp-content/uploads/sites/2/2026/01/dk-prices-14.01.2026.xlsx"
+# TODO: Find locations for stations
 
 PRODUCTS = {
     DIESEL: {"name": "Shell FuelSave Diesel"},

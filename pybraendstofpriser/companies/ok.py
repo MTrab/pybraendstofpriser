@@ -64,5 +64,7 @@ class FuelCompany(FuelCompanyBase):
                         OCTANE_100: fuel_100_price,
                         DIESEL: diesel_price,
                     },
+                    lat=float(station["latitude"]),  # type: ignore
+                    lon=float(station["longtitude"]),  # type: ignore
                 )
             )

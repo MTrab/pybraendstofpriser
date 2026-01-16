@@ -33,10 +33,17 @@ class FuelCompany(FuelCompanyBase):
 
             if not row[2].startswith("OIL!"):  # Only iterate over valid stations
                 continue
+            loc_tmp = row[4].replace(" N", "").replace(" E", "")
+            location = loc_tmp.split(",")
+            if len(location) == 1:
+                # Sometimes they forget the comma seperator
+                location = loc_tmp.split(" ")
 
             station_id = row[1] if isinstance(row[1], int) else None
             station_name = clean_product_name(row[2])
             station_address = clean_product_name(row[3])
+            latitude = location[0].strip()
+            longitude = location[1].strip()
             fuel_95_price = clean_value(str(row[5]))
             diesel_price = clean_value(str(row[6]))
             bio_diesel_price = clean_value(str(row[7]))
@@ -50,5 +57,7 @@ class FuelCompany(FuelCompanyBase):
                         DIESEL: diesel_price,
                         BIO_DIESEL: bio_diesel_price,
                     },
+                    lat=latitude,
+                    lon=longitude,
                 )
             )

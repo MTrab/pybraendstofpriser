@@ -7,6 +7,7 @@ from ..tools import clean_product_name, clean_value, get_website
 from . import FuelCompanyBase, FuelStation
 
 BASEURL = "https://beta.q8.dk/Station/GetStationPrices?pageSize=5000"
+# TODO: Find locations for stations
 
 PRODUCTS = {
     DIESEL: {"name": "GoEasy Diesel"},

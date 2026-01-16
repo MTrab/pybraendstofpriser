@@ -60,12 +60,14 @@ class FuelCompanyBase:
 class FuelStation:
     """Fuel station class."""
 
-    def __init__(self, sid: int, name: str, address: str, prices: dict) -> None:
+    def __init__(self, sid: int, name: str, address: str, prices: dict, lat:float=0.00, lon:float=0.00) -> None:
         """Initialize the FuelStation class."""
         self._id = sid
         self._name = name
         self._address = address
         self._prices = prices
+        self._lat = lat
+        self._lon = lon
 
     @property
     def id(self) -> int:
@@ -86,3 +88,13 @@ class FuelStation:
     def prices(self) -> dict:
         """Get station prices."""
         return self._prices
+
+    @property
+    def latitude(self) -> float:
+        """Get station latitude."""
+        return self._lat
+
+    @property
+    def longitude(self) -> float:
+        """Get station longitude."""
+        return self._lon
