@@ -11,7 +11,6 @@ class FuelCompanyBase:
     def __init__(self, products: dict) -> None:
         """Initialize the FuelCompany class."""
         self._stations: list[FuelStation] = []
-        self.station: str | None = None
         self.products = products
         self._station_obj: FuelStation
 
@@ -19,25 +18,25 @@ class FuelCompanyBase:
         """Get product name."""
         return self.products[product]["name"]
 
-    def fetch_price(self, product: str) -> float:
+    def fetch_price(self, station: str, product: str) -> float:
         """Fetch fuel prices."""
         for s in self._stations:
-            if s.name == self.station:
+            if s.name == station:
                 if s.prices.get(product) is None:
                     raise ProductNotFoundError(
                         f"Product '{self.products[product]['name']}'"
-                        f" not found at stations '{self.station}'"
+                        f" not found at stations '{station}'"
                     )
                 return s.prices.get(product)  # type: ignore
         raise ProductNotFoundError(
-            f"Product '{self.products[product]['name']}' not found at station '{self.station}'"
+            f"Product '{self.products[product]['name']}' not found at station '{station}'"
         )
 
-    async def list_products(self) -> list[str]:
+    async def list_products(self, station) -> list[str]:
         """List available fuel products."""
         retlist = []
         for s in self._stations:
-            if s.name == self.station:
+            if s.name == station:
                 for product, price in s.prices.items():
                     if not isinstance(price, type(None)):
                         retlist.append(product)
@@ -60,7 +59,15 @@ class FuelCompanyBase:
 class FuelStation:
     """Fuel station class."""
 
-    def __init__(self, sid: int, name: str, address: str, prices: dict, lat:float=0.00, lon:float=0.00) -> None:
+    def __init__(
+        self,
+        sid: int,
+        name: str,
+        address: str,
+        prices: dict,
+        lat: float = 0.00,
+        lon: float = 0.00,
+    ) -> None:
         """Initialize the FuelStation class."""
         self._id = sid
         self._name = name
