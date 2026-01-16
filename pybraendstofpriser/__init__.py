@@ -85,7 +85,7 @@ class Braendstofpriser:
         if self.company is None:
             raise ValueError("Company not set. Please set a company first.")
 
-        _LOGGER.debug("Listing stations for %s", self.company)
+        _LOGGER.debug("Listing stations for %s", self.company.name)
         return await self.company.list_stations()
 
     async def list_products(self, station):

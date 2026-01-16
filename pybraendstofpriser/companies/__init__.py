@@ -8,11 +8,17 @@ from ..exceptions import ProductNotFoundError
 class FuelCompanyBase:
     """Fuel company base class."""
 
-    def __init__(self, products: dict) -> None:
+    def __init__(self, company_name: str, products: dict) -> None:
         """Initialize the FuelCompany class."""
+        self._name = company_name
         self._stations: list[FuelStation] = []
         self.products = products
         self._station_obj: FuelStation
+
+    @property
+    def name(self) -> str:
+        """Get station name."""
+        return self._name
 
     def get_product_name(self, product: str) -> str:
         """Get product name."""
