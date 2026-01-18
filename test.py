@@ -10,11 +10,18 @@ async def main():
     """Main test function."""
     braendstofpriser = Braendstofpriser()
 
-    companies = await braendstofpriser.list_companies()
-    company = random.choice(list(companies.keys()))
+    def sorter(e):
+        return e.name
+
+    # companies = await braendstofpriser.list_companies()
+    # company = random.choice(list(companies.keys()))
+    company = "OK"
     await braendstofpriser.set_company(company)
     stations = await braendstofpriser.list_stations()
-    station = (random.choice(stations)).name
+    stations.sort(key=sorter)
+
+    # station = (random.choice(stations)).name
+    station = "Voldby, Dolmervej"
     products = await braendstofpriser.list_products(station)
     product = random.choice(products)
 

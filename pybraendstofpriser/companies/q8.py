@@ -25,7 +25,7 @@ class FuelCompany(FuelCompanyBase):
 
     def __init__(self) -> None:
         """Initialize the FuelCompany class."""
-        super().__init__(PRODUCTS)
+        super().__init__(COMPANY_NAME, PRODUCTS)
 
     async def _load_stations(self) -> None:
         """Load fuel stations."""
