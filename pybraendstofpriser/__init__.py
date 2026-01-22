@@ -23,16 +23,6 @@ class Braendstofpriser:
         self.conn = Connector(apikey)
         _LOGGER.debug("Braendstofpriser initialized")
 
-    async def close(self) -> None:
-        """Close underlying resources (connector/session)."""
-        await self.conn.close()
-
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, exc_type, exc, tb):
-        await self.close()
-
     async def list_companies(self) -> dict:
         """List available fuel companies.
 

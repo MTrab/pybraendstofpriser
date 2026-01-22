@@ -1,6 +1,8 @@
 """Connector module for communicating with fuel price services."""
 
 from __future__ import annotations
+from typing import Optional
+from wsgiref import headers
 import aiohttp
 
 from .const import API_ENDPOINT, API_TIMEOUT
@@ -19,21 +21,9 @@ class Connector:
 
     def __init__(self, apikey: str):
         """Initialize the Connector class."""
-        self.session = aiohttp.ClientSession()
         self.apikey = apikey
 
-    async def close(self) -> None:
-        """Close the underlying aiohttp session."""
-        if not self.session.closed:
-            await self.session.close()
-
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, exc_type, exc, tb):
-        await self.close()
-
-    async def fetch_data(self, endpoint: str, args: Optional[Dict] = None) -> dict:
+    async def fetch_data(self, endpoint: str, args: Optional[dict] = None) -> dict:
         """Fetch data from the specified endpoint.
 
         Args:
@@ -45,9 +35,7 @@ class Connector:
         url = f"{API_ENDPOINT}{endpoint}"
         headers = {"X-API-KEY": self.apikey}
         timeout = aiohttp.ClientTimeout(total=API_TIMEOUT)
-
-        async with self.session.get(
-            url, params=args, headers=headers, timeout=timeout
-        ) as response:
-            response.raise_for_status()
-            return await response.json()
+        async with aiohttp.ClientSession(headers=headers) as session:
+            async with session.get(url, params=args, timeout=timeout) as response:
+                response.raise_for_status()
+                return await response.json()
