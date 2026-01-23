@@ -15,3 +15,4 @@ testbild.png
 
 # Optional: fixtures
 tests/fixtures/*.*~
+.env

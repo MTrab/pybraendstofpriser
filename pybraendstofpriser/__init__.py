@@ -2,18 +2,11 @@
 
 from __future__ import annotations
 
-import importlib
 import logging
 import sys
-from asyncio import get_running_loop
 from collections import namedtuple
-from os import listdir
-from posixpath import dirname
 
-from genericpath import isfile
-
-from .companies import FuelCompanyBase
-from .exceptions import StationNotFoundError
+from .conn import Connector, Endpoint
 
 if sys.version_info < (3, 11, 0):
     sys.exit("The pybraendstofpriser module requires Python 3.11.0 or later")
@@ -25,79 +18,48 @@ Company = namedtuple("Company", "module namespace products name")
 class Braendstofpriser:
     """Main class for pybraendstofpriser module."""
 
-    def __init__(self):
+    def __init__(self, apikey: str):
         """Initialize the Braendstofpriser class."""
-        self.companies = {}
-        self.company: FuelCompanyBase
-
+        self.conn = Connector(apikey)
         _LOGGER.debug("Braendstofpriser initialized")
 
-    async def list_companies(self):
-        """List fuel companies."""
-        _LOGGER.debug("Listing companies")
-        loop = get_running_loop()
-        companies = await loop.run_in_executor(
-            None, listdir, f"{dirname(__file__)}/companies"
-        )
-        for company in sorted(companies):
-            company_path = f"{dirname(__file__)}/companies/{company}"
-            if (
-                isfile(company_path)
-                and not company.endswith("__pycache__")
-                and not company == "__init__.py"
-            ):
-                company_name = company.replace(".py", "")
-                _LOGGER.debug("Found company: %s", company_name)
+    async def list_companies(self) -> dict:
+        """List available fuel companies.
 
-                ns = f".companies.{company.replace('.py', '')}"
-                mod = await self._load_module(ns)
+        Returns:
+            dict: A dictionary of available fuel companies.
+        """
+        return await self.conn.fetch_data(Endpoint.COMPANIES)
 
-                self.companies.update(
-                    {
-                        mod.COMPANY_NAME: {
-                            "products": mod.PRODUCTS,
-                            "namespace": ns,
-                        }
-                    }
-                )
+    async def list_stations(
+        self, company_id: int | None = None, company_name: str | None = None
+    ) -> dict:
+        """List fuel stations for a given company.
 
-        return self.companies
+        Args:
+            company_id (int): The company ID.
+            company_name (str): The company name (Case-sensitive).
+        """
+        args = {}
+        if company_id is not None:
+            args["company_id"] = company_id
+        elif company_name is not None:
+            args["company_name"] = company_name
 
-    async def set_company(self, company: str):
-        """Set the fuel company."""
-        if len(self.companies) == 0:
-            await self.list_companies()
+        return await self.conn.fetch_data(Endpoint.STATIONS, args)
 
-        _LOGGER.debug("Setting company to %s", company)
-        c = await self._load_module(self.companies[company]["namespace"])
-        self.company = c.FuelCompany()
-        await self.company.list_stations()
+    async def get_prices(
+        self,
+        station_id: int,
+    ) -> dict:
+        """Get fuel prices for a given station.
 
-    def get_price(self, station: str, product: str):
-        """Get fuel price for a specific company and product."""
-        if self.company is None:
-            raise ValueError("Company not set. Please set a company first.")
+        Args:
+            station_id (int): The station ID.
 
-        _LOGGER.debug("Getting price for %s", product)
-        return self.company.fetch_price(station, product)
+        Returns:
+            dict: A dictionary of company information, station information, and fuel prices.
+        """
+        args = {"station_id": station_id}
 
-    async def list_stations(self):
-        """List fuel stations for a specific company."""
-        if self.company is None:
-            raise ValueError("Company not set. Please set a company first.")
-
-        _LOGGER.debug("Listing stations for %s", self.company.name)
-        return await self.company.list_stations()
-
-    async def list_products(self, station):
-        """List fuel products for a specific company and station."""
-        _LOGGER.debug("Listing products for %s", station)
-        return await self.company.list_products(station)
-
-    @staticmethod
-    async def _load_module(namespace: str):
-        """Dynamically load a module."""
-        loop = get_running_loop()
-        return await loop.run_in_executor(
-            None, importlib.import_module, namespace, __name__
-        )
+        return await self.conn.fetch_data(Endpoint.PRICES, args)
