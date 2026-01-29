@@ -6,6 +6,8 @@ import logging
 import sys
 from collections import namedtuple
 
+from .exceptions import StationNotFoundError
+
 from .conn import Connector, Endpoint
 
 if sys.version_info < (3, 11, 0):
@@ -13,6 +15,15 @@ if sys.version_info < (3, 11, 0):
 
 _LOGGER = logging.getLogger(__name__)
 Company = namedtuple("Company", "module namespace products name")
+
+
+class Flist(list):
+    def find(self, key, value) -> dict | None:
+        for o in self:
+            if o.get(key) == value:
+                return o
+
+        return None
 
 
 class Braendstofpriser:
@@ -23,17 +34,17 @@ class Braendstofpriser:
         self.conn = Connector(apikey)
         _LOGGER.debug("Braendstofpriser initialized")
 
-    async def list_companies(self) -> dict:
+    async def list_companies(self) -> Flist[dict]:
         """List available fuel companies.
 
         Returns:
             dict: A dictionary of available fuel companies.
         """
-        return await self.conn.fetch_data(Endpoint.COMPANIES)
+        return Flist(await self.conn.fetch_data(Endpoint.COMPANIES))
 
     async def list_stations(
         self, company_id: int | None = None, company_name: str | None = None
-    ) -> dict:
+    ) -> Flist[dict]:
         """List fuel stations for a given company.
 
         Args:
@@ -46,7 +57,7 @@ class Braendstofpriser:
         elif company_name is not None:
             args["company_name"] = company_name
 
-        return await self.conn.fetch_data(Endpoint.STATIONS, args)
+        return Flist(await self.conn.fetch_data(Endpoint.STATIONS, args))
 
     async def get_prices(
         self,
