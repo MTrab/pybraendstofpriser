@@ -23,7 +23,7 @@ class Connector:
         """Initialize the Connector class."""
         self.apikey = apikey
 
-    async def fetch_data(self, endpoint: str, args: Optional[dict] = None) -> dict:
+    async def fetch_data(self, endpoint: str, args: Optional[dict] = None) -> Any:
         """Fetch data from the specified endpoint.
 
         Args:

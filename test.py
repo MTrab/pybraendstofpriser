@@ -7,7 +7,7 @@ from os import environ
 
 from aiohttp import ClientResponseError
 
-from pybraendstofpriser import Braendstofpriser
+from pybraendstofpriser import Braendstofpriser, Flist
 
 
 async def main():
@@ -19,7 +19,8 @@ async def main():
         # stations = await braendstofpriser.list_stations(company_name=company["company"])
         stations = await braendstofpriser.list_stations(company_name="Uno-X")
         sid = 2607
-        station = stations.
+        # station = braendstofpriser.find(stations, "id", sid)
+        station = stations.find("id", sid)
         station = random.choice(stations)
         prices = await braendstofpriser.get_prices(station_id=station["id"])
         product = random.choice(list(prices["prices"].keys()))
