@@ -16,7 +16,10 @@ async def main():
     try:
         companies = await braendstofpriser.list_companies()
         company = random.choice(companies)
-        stations = await braendstofpriser.list_stations(company_name=company["company"])
+        # stations = await braendstofpriser.list_stations(company_name=company["company"])
+        stations = await braendstofpriser.list_stations(company_name="Uno-X")
+        sid = 2607
+        station = stations.
         station = random.choice(stations)
         prices = await braendstofpriser.get_prices(station_id=station["id"])
         product = random.choice(list(prices["prices"].keys()))

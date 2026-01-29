@@ -6,6 +6,8 @@ import logging
 import sys
 from collections import namedtuple
 
+from .exceptions import StationNotFoundError
+
 from .conn import Connector, Endpoint
 
 if sys.version_info < (3, 11, 0):
@@ -22,6 +24,14 @@ class Braendstofpriser:
         """Initialize the Braendstofpriser class."""
         self.conn = Connector(apikey)
         _LOGGER.debug("Braendstofpriser initialized")
+
+    def find(self, obj: list[dict], key, value) -> dict:
+        """Find object by key/value."""
+        for i in obj:
+            if i.get(key) == value:
+                return i
+
+        raise StationNotFoundError(f"Nothing found, matching {key} with {value}")
 
     async def list_companies(self) -> dict:
         """List available fuel companies.
