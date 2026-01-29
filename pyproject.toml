@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pybraendstofpriser"
-version = "2.1.0"
+version = "2.1.1"
 description = "Library for fetching fuel prices from Fuelprices.dk API"
 authors = ["Malene Trab <malene@trab.dk>"]
 license = "MIT"
