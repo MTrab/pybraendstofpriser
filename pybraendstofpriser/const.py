@@ -8,4 +8,4 @@ OCTANE_95 = "octane_95"
 OCTANE_100 = "octane_100"
 
 API_TIMEOUT = 10  # seconds
-API_ENDPOINT = "https://api.fuelprices.dk/v1"
+API_ENDPOINT = "https://fuelprices.dk/api/v1"
