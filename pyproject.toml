@@ -5,6 +5,7 @@ description = "Library for fetching fuel prices from Fuelprices.dk API"
 authors = ["Malene Trab <malene@trab.dk>"]
 license = "GPL-3.0-only"
 readme = "README.md"
+repository = "https://github.com/MTrab/pybraendstofpriser"
 
 [tool.poetry.dependencies]
 python = "^3.11"
