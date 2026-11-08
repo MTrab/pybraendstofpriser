@@ -3,7 +3,7 @@ name = "pybraendstofpriser"
 version = "2.2.0"
 description = "Library for fetching fuel prices from Fuelprices.dk API"
 authors = ["Malene Trab <malene@trab.dk>"]
-license = "MIT"
+license = "GPL-3.0-only"
 readme = "README.md"
 
 [tool.poetry.dependencies]
