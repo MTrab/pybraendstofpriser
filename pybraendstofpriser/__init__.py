@@ -5,16 +5,17 @@ from __future__ import annotations
 import logging
 import sys
 from collections import namedtuple
-
-from .exceptions import StationNotFoundError
+from collections.abc import Sequence
 
 from .conn import Connector, Endpoint
+from .exceptions import StationNotFoundError
 
 if sys.version_info < (3, 11, 0):
     sys.exit("The pybraendstofpriser module requires Python 3.11.0 or later")
 
 _LOGGER = logging.getLogger(__name__)
 Company = namedtuple("Company", "module namespace products name")
+_BULK_STATION_LIMIT = 1000
 
 
 class Flist(list):
@@ -74,3 +75,32 @@ class Braendstofpriser:
         args = {"station_id": station_id}
 
         return await self.conn.fetch_data(Endpoint.PRICES, args)
+
+    async def get_prices_bulk(self, station_ids: Sequence[int]) -> Flist[dict]:
+        """Get all current products for the requested stations.
+
+        Split IDs into groups of at most 1000 and fetch all pages per group.
+        Return the API records unchanged; raise on any failed request.
+        """
+        unique_ids = list(dict.fromkeys(station_ids))
+        stations = Flist()
+        for start in range(0, len(unique_ids), _BULK_STATION_LIMIT):
+            batch = unique_ids[start : start + _BULK_STATION_LIMIT]
+            page = 1
+            while True:
+                data = await self.conn.fetch_data(
+                    Endpoint.STATIONS_BULK,
+                    {
+                        "station_ids": ",".join(
+                            str(station_id) for station_id in batch
+                        ),
+                        "page": page,
+                        "page_size": _BULK_STATION_LIMIT,
+                    },
+                )
+                stations.extend(data["items"])
+                if page >= data["total_pages"]:
+                    break
+                page += 1
+
+        return stations

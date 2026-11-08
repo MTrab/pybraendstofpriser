@@ -1,8 +1,10 @@
 """Connector module for communicating with fuel price services."""
 
 from __future__ import annotations
+
 from typing import Optional
 from wsgiref import headers
+
 import aiohttp
 
 from .const import API_ENDPOINT, API_TIMEOUT
@@ -13,6 +15,7 @@ class Endpoint:
 
     PRICES = "/prices"
     STATIONS = "/stations"
+    STATIONS_BULK = "/stations/bulk"
     COMPANIES = "/companies"
 
 
