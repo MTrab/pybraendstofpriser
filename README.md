@@ -31,3 +31,17 @@ The API omits unknown, inactive, stale, and unpriced stations. HTTP errors are
 raised to the caller, including errors on later groups or pages; partial results
 are not returned. The existing `get_prices` method remains available for fetching
 a single station.
+
+### User-Agent
+
+API requests send `pybraendstofpriser/<version>` by default, using the installed
+package version. When package metadata is unavailable, the default is
+`pybraendstofpriser/unknown`.
+
+Pass `user_agent` to use your application's own value.
+
+```python
+from pybraendstofpriser import Braendstofpriser
+
+client = Braendstofpriser("your-api-key", user_agent="MyApp/1.0")
+```

@@ -2,12 +2,22 @@
 
 from __future__ import annotations
 
-from typing import Optional
-from wsgiref import headers
+import asyncio
+from importlib.metadata import PackageNotFoundError, version
+from typing import Any, Optional
 
 import aiohttp
 
 from .const import API_ENDPOINT, API_TIMEOUT
+
+
+def _default_user_agent() -> str:
+    """Resolve the installed package version using distribution metadata."""
+    try:
+        package_version = version("pybraendstofpriser")
+    except PackageNotFoundError:
+        package_version = "unknown"
+    return f"pybraendstofpriser/{package_version}"
 
 
 class Endpoint:
@@ -22,9 +32,10 @@ class Endpoint:
 class Connector:
     """Connector class for handling HTTP communication."""
 
-    def __init__(self, apikey: str):
+    def __init__(self, apikey: str, *, user_agent: str | None = None):
         """Initialize the Connector class."""
         self.apikey = apikey
+        self._user_agent = user_agent
 
     async def fetch_data(self, endpoint: str, args: Optional[dict] = None) -> Any:
         """Fetch data from the specified endpoint.
@@ -35,8 +46,11 @@ class Connector:
         Returns:
             dict: The JSON response from the API.
         """
+        if self._user_agent is None:
+            self._user_agent = await asyncio.to_thread(_default_user_agent)
+
         url = f"{API_ENDPOINT}{endpoint}"
-        headers = {"X-API-KEY": self.apikey}
+        headers = {"X-API-KEY": self.apikey, "User-Agent": self._user_agent}
         timeout = aiohttp.ClientTimeout(total=API_TIMEOUT)
         async with aiohttp.ClientSession(headers=headers) as session:
             async with session.get(url, params=args, timeout=timeout) as response:
