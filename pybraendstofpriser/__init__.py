@@ -30,9 +30,9 @@ class Flist(list):
 class Braendstofpriser:
     """Main class for pybraendstofpriser module."""
 
-    def __init__(self, apikey: str):
-        """Initialize the Braendstofpriser class."""
-        self.conn = Connector(apikey)
+    def __init__(self, apikey: str, *, user_agent: str | None = None):
+        """Initialize the client with an optional custom User-Agent."""
+        self.conn = Connector(apikey, user_agent=user_agent)
         _LOGGER.debug("Braendstofpriser initialized")
 
     async def list_companies(self) -> Flist[dict]:
