@@ -1,17 +1,23 @@
 """Tests for the User-Agent sent by the client."""
 
 import unittest
-from importlib.metadata import PackageNotFoundError
-from threading import get_ident
+from importlib.metadata import PackageNotFoundError, version
 from unittest.mock import patch
 
 from aiohttp import web
 from aiohttp.test_utils import TestServer
 
 from pybraendstofpriser import Braendstofpriser
+from pybraendstofpriser.conn import _default_user_agent
 
 
 class UserAgentTest(unittest.IsolatedAsyncioTestCase):
+    def setUp(self) -> None:
+        try:
+            self.installed_version = version("pybraendstofpriser")
+        except PackageNotFoundError:
+            self.installed_version = "unknown"
+
     async def asyncSetUp(self) -> None:
         self.user_agents = []
 
@@ -27,35 +33,21 @@ class UserAgentTest(unittest.IsolatedAsyncioTestCase):
         endpoint = str(server.make_url("/")).rstrip("/")
         self.enterContext(patch("pybraendstofpriser.conn.API_ENDPOINT", endpoint))
 
-    async def test_default_resolves_version_off_the_event_loop(self) -> None:
-        event_loop_thread = get_ident()
-        installed_version = "9.8.7"
-
-        def read_version(_package: str) -> str:
-            self.assertNotEqual(get_ident(), event_loop_thread)
-            return installed_version
-
-        with patch(
-            "pybraendstofpriser.conn.version", side_effect=read_version
-        ) as version:
+    async def test_default_uses_version_resolved_at_import(self) -> None:
+        with patch("pybraendstofpriser.conn.version") as lookup:
             client = Braendstofpriser("test-key")
-            version.assert_not_called()
             await client.list_companies()
-            await client.list_companies()
-            version.assert_called_once_with("pybraendstofpriser")
+            lookup.assert_not_called()
 
-        self.assertEqual(self.user_agents, [f"pybraendstofpriser/{installed_version}"] * 2)
+        self.assertEqual(self.user_agents, [f"pybraendstofpriser/{self.installed_version}"])
 
-    async def test_custom_value_skips_version_lookup(self) -> None:
-        with patch("pybraendstofpriser.conn.version") as version:
-            client = Braendstofpriser("test-key", user_agent="MyApp/1.0")
-            await client.list_companies()
-            version.assert_not_called()
-
+    async def test_custom_value_overrides_default(self) -> None:
+        client = Braendstofpriser("test-key", user_agent="MyApp/1.0")
+        await client.list_companies()
         self.assertEqual(self.user_agents, ["MyApp/1.0"])
 
-    async def test_missing_metadata_uses_unknown_version(self) -> None:
-        with patch("pybraendstofpriser.conn.version", side_effect=PackageNotFoundError):
-            await Braendstofpriser("test-key").list_companies()
 
-        self.assertEqual(self.user_agents, ["pybraendstofpriser/unknown"])
+class DefaultUserAgentTest(unittest.TestCase):
+    def test_missing_metadata_uses_unknown_version(self) -> None:
+        with patch("pybraendstofpriser.conn.version", side_effect=PackageNotFoundError):
+            self.assertEqual(_default_user_agent(), "pybraendstofpriser/unknown")
